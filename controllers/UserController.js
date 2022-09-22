@@ -1,19 +1,12 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import { validationResult, body } from 'express-validator'
-import UserModel from  '../models/User.js'
-
+import UserModel from '../models/User.js'
 
 export const register = async (req, res) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json(errors.array())
-        }
-
-        const password = req.body.password
-        const salt = await bcrypt.genSalt(10)
-        const hash = await bcrypt.hash(password, salt)
+        const password = req.body.password;
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
 
         const doc = new UserModel({
             email: req.body.email,
@@ -22,8 +15,7 @@ export const register = async (req, res) => {
             passwordHash: hash,
         });
 
-
-        const user = await doc.save()
+        const user = await doc.save();
 
         const token = jwt.sign(
             {
@@ -44,28 +36,28 @@ export const register = async (req, res) => {
     } catch (err) {
         console.log(err)
         res.status(500).json({
-            message: 'не удалось зарегестрироваться'
-        })
-    }
-}
+            message: 'REGISTRATION ERROR'
+        });
+    };
+};
 
 export const login = async (req, res) => {
     try {
-        const user = await UserModel.findOne({ email: req.body.email })
+        const user = await UserModel.findOne({ email: req.body.email });
 
         if (!user) {
             return res.status(404).json({
-                message: 'User not found'
-            })
-        }
+                message: 'USER NOT FOUND'
+            });
+        };
 
         const isValidPass = await bcrypt.compare(req.body.password, user._doc.passwordHash);
         if (!isValidPass) {
             return res.status(400).json({
-                message: 'pass wrong'
-            })
-            console.log('pizdda')
-        }
+                message: 'LOGIN ERROR'
+            });
+            console.log('LOGIN ERROR')
+        };
 
         const token = jwt.sign(
             {
@@ -86,28 +78,28 @@ export const login = async (req, res) => {
     } catch (err) {
         console.log(err)
         res.status(500).json({
-            message: 'не удалось авторизоваться'
-        })
-    }
-}
+            message: 'AUTHORIRATION FAILED'
+        });
+    };
+};
 
 export const getMe = async (req, res) => {
-    try{
-        const user = await UserModel.findById(req.userId)
+    try {
+        const user = await UserModel.findById(req.userId);
 
-        if(!user){
+        if (!user) {
             return res.status(404).json({
-                message: "User not found",
+                message: "USER NOT FOUND",
             });
-        }
+        };
 
-        const {passwordHash, ...userData} = user._doc;
+        const { passwordHash, ...userData } = user._doc;
 
         res.json(userData);
-    }catch(err){
+    } catch (err) {
         console.log(err)
         res.status(500).json({
-            message: 'не удалось зарегестрироваться'
-        })
-    }
-}
+            message: 'ERROR'
+        });
+    };
+};

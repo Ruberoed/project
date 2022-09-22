@@ -5,18 +5,18 @@ export default (req, res, next) => {
 
     if(token){
         try{
-            const decoded = jwt.verify(token, 'parashut')
+            const decoded = jwt.verify(token, 'parashut');
 
             req.userId = decoded._id;
-            next()
+            next();
         }catch(err){
             return res.status(403).json({
-                message: 'Not access'
-            })
+                message: 'ERROR'
+            });
         }
     }else{
         return res.status(403).json({
-            message: 'Not access',
-        })
-    }
+            message: 'NOT ACCESS',
+        });
+    };
 };
